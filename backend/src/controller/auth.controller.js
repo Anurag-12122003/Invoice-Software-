@@ -1,0 +1,68 @@
+import User from "../model/user.model.js";
+import bcrypt from "bcryptjs";
+import EnvDetails from '../utils/envDetails.js'
+import jwt from 'jsonwebtoken'
+
+class AuthController {
+
+    async login(req, res) {
+        try {
+            const { email, password } = req.body;
+            const user = await User.findOne({ email: email });
+
+            if (!user) {
+                return res.status(400).json({ error: "Invalid username or password" });
+            }
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ error: "Invalid username or password" });
+            }
+
+            // स्टेप C: JWT टोकन जेनरेट करें
+            const token = jwt.sign(
+                { userId: user._id, email: user.email },
+                EnvDetails.JWT_SECRET,
+                { expiresIn: '1h' }
+            );
+            // स्टेप D: टोकन को HTTP-Only Cookie में सेट करें
+            res.cookie('token', token, {
+                httpOnly: true, // ब्राउज़र का JS इस कुकी को रीड नहीं कर पाएगा (XSS से सुरक्षित)
+                secure: false,  // लोकलहोस्ट (HTTP) पर टेस्ट करने के लिए false, प्रोडक्शन (HTTPS) पर true करें
+                maxAge: 3600000 // 1 घंटा (मिलीसेकंड में)
+            });
+
+            res.json({ message: "Login successful!" });
+
+        } catch (error) {
+            res.status(500).json({ error: "Server error during login." });
+        }
+    }
+    async signup(req, res) {
+
+        try {
+            const { name, email, password } = req.body;
+            const userExists = await User.findOne({ email: email });
+            if (userExists) {
+                return res.status(400).json({ error: "Username already taken. Try another." });
+            }
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // create new user for saving in MongoDB
+            const newUser = new User({
+                name: name,
+                email: email,
+                password: hashedPassword
+            });
+            await newUser.save();
+
+            res.status(201).json({ message: "User registered successfully!" });
+        } catch (error) {
+            res.status(500).json({ error: "Server error during registration." });
+        }
+    }
+    logout(req, res) {
+        res.clearCookie('token');
+        res.json({ message: "Logged out successfully" });
+    }
+}
+export default AuthController
