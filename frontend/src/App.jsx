@@ -1,21 +1,13 @@
-import { Button, Container, Paper } from "@mui/material"
-import ThemeSwitcher from "./theme/ThemeSwitcher"
+import { Stack } from "@mui/material";
+import { Login } from "./pages/Login";
 
-const App = () => {
+export default function App () {
   return (
-    <Container sx={{ mt: 4 }}>
-      <Paper sx={{ p: 3 }}>
-        <ThemeSwitcher />
-
-        <Button
-          variant="contained"
-          sx={{ mt: 3 }}
-        >
-          Save Invoice
-        </Button>
-      </Paper>
-    </Container>
-  )
-}
-
-export default App
+    <Stack sx={{
+      // border: "1px solid red",
+      height: "100vh"
+    }}>
+      <Login />
+    </Stack>
+  );
+};
