@@ -8,7 +8,7 @@ class AuthController {
     async login(req, res) {
         try {
             const { email, password } = req.body;
-            const user = await User.findOne({ email: email });
+            const user = await User.findOne({ email: email }).select("+password");
 
             if (!user) {
                 return res.status(400).json({ error: "Invalid username or password" });
@@ -22,16 +22,17 @@ class AuthController {
             const token = jwt.sign(
                 { userId: user._id, email: user.email },
                 EnvDetails.JWT_SECRET,
-                { expiresIn: '1h' }
+                { expiresIn: '7d' }
             );
             // स्टेप D: टोकन को HTTP-Only Cookie में सेट करें
-            res.cookie('token', token, {
-                httpOnly: true, // ब्राउज़र का JS इस कुकी को रीड नहीं कर पाएगा (XSS से सुरक्षित)
-                secure: false,  // लोकलहोस्ट (HTTP) पर टेस्ट करने के लिए false, प्रोडक्शन (HTTPS) पर true करें
-                maxAge: 3600000 // 1 घंटा (मिलीसेकंड में)
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
-            res.json({ message: "Login successful!" });
+            res.json({ message: "Login successful!", data: user });
 
         } catch (error) {
             res.status(500).json({ error: "Server error during login." });

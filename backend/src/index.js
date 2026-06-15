@@ -1,13 +1,11 @@
 import express from 'express';
-import connectDb from './config/db.config.js';
-import dotenv from 'dotenv';
 import authRouter from './routes/auth.route.js';
 import { fileURLToPath } from 'node:url';
 import cookieParser from 'cookie-parser';
 import path from 'node:path';
-dotenv.config()
+import companyRouter from './routes/company.route.js';
+import Company from './model/company.model.js';
 
-// connectDb()
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // path.join();
@@ -27,5 +25,28 @@ app.use(cookieParser('anurag'))
 
 // routes
 app.use('/api', authRouter);
+app.use('/api',companyRouter);
+
+// app.get("/indexes", async (req, res) => {
+//   try {
+//     const indexes = await Company.collection.indexes();
+//     res.json(indexes);
+//   } catch (err) {
+//     res.status(500).json(err);
+//   }
+// });
+
+// app.get("/drop-email-index", async (req, res) => {
+//   try {
+//     await Company.collection.dropIndex("email_1");
+
+//     res.json({
+//       success: true,
+//       message: "Email index deleted"
+//     });
+//   } catch (err) {
+//     res.json(err);
+//   }
+// });
 
 export default app;

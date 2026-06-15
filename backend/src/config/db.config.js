@@ -1,4 +1,3 @@
-// import { mo } from "mongoose";
 import mongoose from "mongoose";
 import EnvDetails from "../utils/envDetails.js";
 
