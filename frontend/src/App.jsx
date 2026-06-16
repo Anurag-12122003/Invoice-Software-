@@ -1,5 +1,7 @@
 import { Stack } from "@mui/material";
 import { Login } from "./pages/Login";
+import { ThemeToggle } from "./components/ThemeToggle";
+import { Route, Routes } from "react-router-dom";
 
 export default function App () {
   return (
@@ -7,7 +9,10 @@ export default function App () {
       // border: "1px solid red",
       height: "100vh"
     }}>
-      <Login />
+      <ThemeToggle />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+      </Routes>
     </Stack>
   );
 };
