@@ -7,7 +7,11 @@ const paymentSchema = new mongoose.Schema(
       ref: "Invoice",
       required: true
     },
-
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true
+    },
     Amount: {
       type: Number,
       required: true
@@ -41,7 +45,7 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Payment= mongoose.model(
+const Payment = mongoose.model(
   "Payment",
   paymentSchema
 );

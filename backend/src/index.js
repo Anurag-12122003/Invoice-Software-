@@ -5,6 +5,12 @@ import cookieParser from 'cookie-parser';
 import path from 'node:path';
 import companyRouter from './routes/company.route.js';
 import Company from './model/company.model.js';
+import customerRouter from './routes/customer.route.js';
+import productRouter from './routes/product.route.js';
+import invoiceRouter from './routes/invoice.route.js';
+import paymentRouter from './routes/payment.route.js';
+import dashboardRouter from './routes/dashboard.route.js';
+import profileRouter from './routes/profile.route.js';
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -26,6 +32,12 @@ app.use(cookieParser('anurag'))
 // routes
 app.use('/api', authRouter);
 app.use('/api',companyRouter);
+app.use('/api',customerRouter);
+app.use('/api',productRouter);
+app.use('/api',invoiceRouter);
+app.use('/api',paymentRouter);
+app.use('/api',dashboardRouter);
+app.use('/api',profileRouter);
 
 // app.get("/indexes", async (req, res) => {
 //   try {

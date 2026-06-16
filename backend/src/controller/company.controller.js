@@ -4,7 +4,7 @@ class CompanyController {
 
     async createCompany(req, res) {
         try {
-            const { CompanyName, GSTIN } = req.body;
+            const { CompanyName, GSTIN, email } = req.body;
 
             // GSTIN aaya hai tabhi check karo
             if (GSTIN) {
@@ -19,15 +19,32 @@ class CompanyController {
                     });
                 }
             }
+            if (email) {
+                const existingCompany =
+                    await Company.findOne({
+                        email: email.toLowerCase(),
+                        company
+                    });
+
+                if (existingCompany) {
+                    return res.status(400).json({
+                        success: false,
+                        message:
+                            "Company Email already exists"
+                    });
+                }
+            }
 
             const company = await Company.create({
                 ...req.body,
                 GSTIN: GSTIN?.toUpperCase(),
+                email:email?.toLowerCase(),
                 user: req.user.userId
             });
 
             return res.status(201).json({
                 success: true,
+                message:"Company created Successfully",
                 data: company
             });
 
@@ -41,7 +58,7 @@ class CompanyController {
 
     async getCompanies(req, res) {
         try {
-            const {user}=req;
+            const { user } = req;
             const companies = await Company.find({
                 user: user.userId
             }).sort({ createdAt: -1 });
@@ -168,14 +185,14 @@ class CompanyController {
                     message: "Company not found"
                 });
             }
-            const companyData=company;
+            const companyData = company;
             await company.deleteOne();
 
             return res.status(200).json({
                 success: true,
                 message:
                     "Company deleted successfully",
-                    data:companyData
+                data: companyData
             });
 
         } catch (error) {

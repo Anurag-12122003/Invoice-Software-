@@ -16,9 +16,12 @@ const customerSchema = new mongoose.Schema(
 
     GSTIN: {
       type: String,
-      trim: true,
+      minlength: [15, "GSTIN must be 15 characters"],
+      maxlength: [15, "GSTIN must be 15 characters"],
       uppercase: true,
-      sparse: true
+      trim: true,
+      sparse: true,
+      unique: true
     },
 
     Mobile: {
@@ -27,7 +30,10 @@ const customerSchema = new mongoose.Schema(
 
     Email: {
       type: String,
-      lowercase: true
+      lowercase: true,
+      trim: true,
+      sparse: true,
+      unique: true
     },
 
     Address: {
@@ -54,7 +60,7 @@ const customerSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Customer= mongoose.model(
+const Customer = mongoose.model(
   "Customer",
   customerSchema
 );
