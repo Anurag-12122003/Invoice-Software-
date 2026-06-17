@@ -1,7 +1,11 @@
 export const getPalette = (mode) => ({
     mode,
+    btn: {
+        text: mode === 'light',
+        background: "#305CDE"
+    },
     primary: {
-        main: mode === 'light' ? "#0000ff" : "#FFFFFF"
+        main: mode === 'light' ? "#305CDE" : "#FFFFFF"
     },
     textColor: {
         main: mode === 'light' ? "#FFFFFF" : "#0000FF"

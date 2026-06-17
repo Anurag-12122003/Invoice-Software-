@@ -1,17 +1,17 @@
 import { Button } from "@mui/material";
 
-export const FormBtn = ({ btnText, type }) => {
+export const FormBtn = ({ btnText }) => {
+  // let theme = useTheme();
   return (
     <Button
-      type={type}
       variant="outlined"
       sx={{
-        bgcolor: "primary.main",
-        color: "textColor.main",
         fontSize: "20px",
+        bgcolor: "primary.main",
+        color: "custom.gray50",
         "&:hover": {
-          bgcolor: "#000080",
-          color: "white",
+          bgcolor: "primary.dark",
+          // color: "text.secondary",
           transition: "all 0.3s ease",
         },
       }}

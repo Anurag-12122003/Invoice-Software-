@@ -1,10 +1,11 @@
-import { createTheme } from "@mui/material";
-import { getPalette } from "./palette";
+import { createTheme } from "@mui/material/styles";
 import { components } from "./components";
+import { lightPalette } from "./mode/light";
+import { darkPalette } from "./mode/dark";
 
 export const getTheme = (mode) => {
-    return createTheme({
-        palette: getPalette(mode),
-        components,
-    })
+  return createTheme({
+    palette: mode === "light" ? lightPalette : darkPalette,
+    components,
+  });
 };
