@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Company from './company.model.js'
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -43,6 +44,39 @@ const userSchema = new mongoose.Schema({
         type: Date
     }
 }, { timestamps: true });
+
+// केस A: जब आप 'findByIdAndDelete' या 'findOneAndDelete' चलाकर यूज़र डिलीट करें
+userSchema.pre('findOneAndDelete', async function (next) {
+    try {
+        const userId = this.getQuery()._id;
+
+        // यूज़र की सभी कम्पनियों को ढूंढें और एक-एक करके डिलीट करें
+        const companies = await Company.find({ user: userId });
+        for (const company of companies) {
+            await Company.findByIdAndDelete(company._id);
+        }
+    } catch (error) {
+         throw new Error(error.message)
+    }
+});
+
+// केस B: जब आप क्लीनअप API में 'deleteMany' चलाकर एक साथ कई अनवेरीफाइड यूज़र्स डिलीट करें
+userSchema.pre('deleteMany', async function () {
+    try {
+        const conditions = this.getQuery();
+        const users = await this.model.find(conditions, '_id');
+        const userIds = users.map(u => u._id);
+
+        if (userIds.length > 0) {
+            const companies = await Company.find({ user: { $in: userIds } });
+            for (const company of companies) {
+                await Company.findByIdAndDelete(company._id);
+            }
+        }
+    } catch (error) {
+        throw new Error(error.message)
+    }
+});
 
 const User = mongoose.model("User", userSchema);
 

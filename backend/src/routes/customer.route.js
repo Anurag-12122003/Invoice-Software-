@@ -6,6 +6,7 @@ const customerRouter=express.Router();
 const customerController=new CustomerController();
 
 customerRouter.post('/create-customer',protect,customerController.createCustomer);
+// this route return all the customer created by user.
 customerRouter.get('/get-customer',protect,customerController.getCustomers);
 customerRouter.patch('/update-customer/:id',protect,customerController.updateCustomer);
 customerRouter.delete('/delete-customer/:id',protect,customerController.deleteCustomer);
