@@ -6,10 +6,12 @@ import { FormBtn } from "../components/CommonBtn/FormBtn";
 import { Heading, Para } from "../components/Typography/Text";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
-import img1 from "../assets/img1.png";
+import { FaRegUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import img1 from "../assets/img1.png";
 
 const validationSchema = Yup.object({
+  name: Yup.string().required("Name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string()
     .required("Password is required")
@@ -17,6 +19,13 @@ const validationSchema = Yup.object({
 });
 
 const formFieldProps = [
+  {
+    id: "name",
+    label: "Name",
+    placeholder: "Enter your fullname",
+    type: "text",
+    startIcon: <FaRegUser size={24} />,
+  },
   {
     id: "email",
     label: "Email",
@@ -33,11 +42,24 @@ const formFieldProps = [
   },
 ];
 
-export const Login = () => {
+export const Register = () => {
   return (
     <Grid container sx={{ height: "100vh" }}>
+      <Grid
+        size={6}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Box sx={{ width: 600, height: 400 }}>
+          <img src={img1} width="100%" />
+        </Box>
+      </Grid>
       <Formik
         initialValues={{
+          name: "",
           email: "",
           password: "",
         }}
@@ -58,24 +80,20 @@ export const Login = () => {
               <Heading text="Invoice Pro" />
               <Para variant="body2" text="Smart Invoicing Solution" />
             </Box> */}
-            <Heading variant="h4" text="Welcome Back!" />
+            <Heading variant="h4" text="Welcome" />
             <form
               onSubmit={handleSubmit}
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "3rem",
+                gap: "2rem",
                 width: "60%",
                 boxShadow: "0 0 2px",
                 borderRadius: "4px",
                 padding: "10px",
-                backgroundColor: "white"
               }}
             >
-              <Para
-                text="Login"
-                style={{ fontSize: "20px", fontWeight: "bold" }}
-              />
+              <Para text="Sign Up" style={{ fontSize: "20px", fontWeight: "bold" }} />
               {formFieldProps.map((fieldProps) => (
                 <InputField
                   key={fieldProps.id}
@@ -85,11 +103,11 @@ export const Login = () => {
                   onBlur={handleBlur}
                 />
               ))}
-              <FormBtn btnText="Login" type="submit" />
+              <FormBtn btnText="Register" type="submit" />
               <Typography variant="caption" sx={{ textAlign: "center" }}>
-                Don't have an account? &nbsp;
-                <Link to="/signup" style={{ textDecoration: "none" }}>
-                  Create Account
+                Already have an account? &nbsp;
+                <Link to="/login" style={{ textDecoration: "none" }}>
+                  Login
                 </Link>
               </Typography>
             </form>
@@ -100,19 +118,6 @@ export const Login = () => {
           </Grid>
         )}
       </Formik>
-
-      <Grid
-        size={6}
-        sx={{ display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center" }}
-      >
-        <Box>
-          <Heading text="Simplify Your Billing" />
-          <Para text="Create, send and track invoices effortiessly." />
-        </Box>
-        <Box sx={{ width: 600, height: 400 }}>
-          <img src={img1} width="100%" />
-        </Box>
-      </Grid>
     </Grid>
   );
 };
