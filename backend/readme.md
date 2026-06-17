@@ -115,6 +115,29 @@ Jab frontend se request payload aata hai, to backend yeh sequential logic run ka
 | **POST** | `/api/log-in` | `email`, `password` | Logs user in, signs JWT, and drops it securely inside browser cookies. |
 | **POST** | `/api/log-out` | None | Destroys active user token from cookies instantly. |
 
+-------------------------------------------------------------------------------------------------------
+
+### 1. User Registration (Sign Up)
+Creates an inactive account and sends a secure 6-digit verification code to the user's inbox.
+* **URL:** `/api/sign-up`
+* **Method:** `POST`
+* **Request Body:**
+  ```json
+  {
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "password": "securepassword123"
+  }
+  ```
+* **Success Response (201):**
+  ```json
+  {
+    "message": "User registered successfully! Please check your email for the 6-digit code."
+  }
+  ```
+
+-------------------------------------------------------------------------------------------------------
+
 ### 🏢 2. Company Routes (`/api`)
 
 | Method | Endpoint | Payload / Rules | Description |
@@ -271,86 +294,67 @@ The Profile module allows authenticated users to manage their account informatio
 
 ---
 
-## 🔐 9. Forgot Password & Reset Password (Under Development)
-
-This feature is currently being implemented.
-
-### Planned Workflow
-
-```text
-Forgot Password
-      │
-      ▼
-Enter Registered Email
-      │
-      ▼
-Generate Reset Token
-      │
-      ▼
-Send Email
-      │
-      ▼
-User Opens Reset Link
-      │
-      ▼
-Reset Password
-      │
-      ▼
-Login Again
-```
-
-### Planned Routes
-
-| Method   | Endpoint                     | Description                               |
-| :------- | :--------------------------- | :---------------------------------------- |
-| **POST** | `/api/forgot-password`       | Sends password reset email.               |
-| **POST** | `/api/reset-password/:token` | Updates password using valid reset token. |
-
-### Planned Security Features
-
-* Secure random reset token generation.
-* Token expiration handling.
-* Password hashing with Bcrypt.
-* One-time reset links.
+## 🔐 9. Reset Password (Update Action)
+Verifies the 15-minute recovery token and safely overwrites the old credentials with the newly hashed password.
+* **URL:** `/api/reset-password`
+* **Method:** `POST`
+* **Request Body:**
+  ```json
+  {
+    "email": "johndoe@example.com",
+    "resetCode": "B3F9A2",
+    "newPassword": "mybrandnewpassword987"
+  }
+  ```
+* **Success Response (200):**
+  ```json
+  {
+    "success": true,
+    "message": "Password updated successfully! You can now log in."
+  }
+  ```
 
 ---
 
-## 📧 10. Email Verification (Under Development)
+## 🔐 10. Forgot Password (OTP Request)
+Generates a short-lived recovery token (expires in 15 minutes) and emails it to the user.
+* **URL:** `/api/forgot-password`
+* **Method:** `POST`
+* **Request Body:**
+  ```json
+  {
+    "email": "johndoe@example.com"
+  }
+  ```
+* **Success/OWASP Response (200):**
+  *(Note: To prevent email harvesting, the response status and message remain identical even if the email does not exist in the database).*
+  ```json
+  {
+    "message": "If that email exists, a password reset code has been sent."
+  }
+  ```
 
-Email verification is currently in progress and will be available in upcoming releases.
+---
 
-### Planned Workflow
 
-```text
-User Registration
-       │
-       ▼
-Verification Email Sent
-       │
-       ▼
-User Clicks Verification Link
-       │
-       ▼
-Email Verified
-       │
-       ▼
-Account Activated
-```
-
-### Planned Routes
-
-| Method   | Endpoint                       | Description                       |
-| :------- | :----------------------------- | :-------------------------------- |
-| **POST** | `/api/send-verification-email` | Sends verification email to user. |
-| **GET**  | `/api/verify-email/:token`     | Verifies user email using token.  |
-
-### Planned Features
-
-* Email verification token generation.
-* Token expiry validation.
-* Resend verification email.
-* Account activation after successful verification.
-* Protection against fake registrations.
+## 11. Email Verification (OTP Check)
+Validates the 6-digit uppercase alphanumeric token sent to the user's mail to flip `isVerified` to `true`.
+* **URL:** `/api/verify-email`
+* **Method:** `POST`
+* **Request Body:**
+  ```json
+  {
+    "email": "johndoe@example.com",
+    "verificationCode": "X7R2W9"
+  }
+  ```
+* **Success Response (200):**
+  ```json
+  {
+    "success": true,
+    "message": "Email verified successfully! You can now log in."
+  }
+  ```
 
 ---
 
@@ -373,11 +377,11 @@ Dashboard Module        ✅ Completed
 
 Profile Module          ✅ Completed
 
-Forgot Password         🚧 In Progress
+Forgot Password         ✅ Completed
 
-Reset Password          🚧 In Progress
+Reset Password          ✅ Completed
 
-Email Verification      🚧 In Progress
+Email Verification      ✅ Completed
 
 PDF Generation          ⏳ Planned
 
