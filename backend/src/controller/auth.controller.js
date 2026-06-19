@@ -5,7 +5,14 @@ import jwt from 'jsonwebtoken'
 import sendEmail from "../utils/mail.service.js";
 import { getResetPasswordEmailHtml, getVerificationEmailHtml } from "../constant.js";
 import randomstring from "randomstring";
+import ejs from 'ejs';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs"
 
+// const dirname = path.dirname(fileURLToPath(import.meta.url));
+// console.log(dirname)
+// console.log(EnvDetails.__dirname)
 class AuthController {
 
     async login(req, res) {
@@ -15,6 +22,9 @@ class AuthController {
 
             if (!user) {
                 return res.status(400).json({ error: "Invalid username or password" });
+            }
+            if(!user?.isVerified){
+                return res.status(400).json({ error: "User is not verified, Please verified first then login." });
             }
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
@@ -45,7 +55,7 @@ class AuthController {
         try {
             const { name, email, password } = req.body;
 
-            if(password.length<6){
+            if (password.length < 6) {
                 return res.status(412).json({ error: "Password must be 6 character." });
             }
             // 1. Check karein ki email pehle se exist to nahi karta
@@ -75,11 +85,29 @@ class AuthController {
             });
 
             // 5. User ko Email Bhejein (Raw code bhej rahe hain)
-            const emailHtml = getVerificationEmailHtml(newUser.name, verificationCode);
+            // const emailHtml = getVerificationEmailHtml(name, verificationCode);
+
+            const templatePath = path.join(EnvDetails.email_Directory, "VerificationEmail.ejs");
+            const logoPath = path.join(EnvDetails.__dirname, "public", "logo.png");
+            console.log("template path: ", templatePath)
+            console.log("logo path: ", logoPath)
+            const obj = {
+                name: name,
+                verificationCode: verificationCode,
+                image: fs.readFileSync(path.join("src", "public", "./logo.png")).toString("base64")
+            }
+            const htmlBody = await ejs.renderFile(templatePath, obj);
+            // console.log(obj.image)
             await sendEmail({
-                email: newUser.email,
+                email: email,
                 subject: "Verify Your Account - OTP Code",
-                html: emailHtml
+                html: htmlBody,
+                // यहाँ attachments एरे जोड़ें
+                attachments: [{
+                    filename: 'logo.png',
+                    path: logoPath,
+                    cid: 'logoID' // यह ID आपकी HTML फाइल के src से मैच होनी चाहिए
+                }]
             });
 
             // 6. Response Sent
@@ -102,6 +130,46 @@ class AuthController {
             maxAge: 2 * 60 * 60 * 1000
         });
         res.json({ message: "Logged out successfully" });
+    }
+    async deleteUserAccount(req, res) {
+        try {
+            // 🌟 बदलाव: ID अब URL से नहीं, बल्कि JWT Verify मिडलवेयर द्वारा सेट किए गए req.user से आएगी
+            const userId = req.user?.userId; 
+
+            if (!userId) {
+                return res.status(401).json({
+                    success: false,
+                    error: "Unauthorized access. No user ID found in token."
+                });
+            }
+
+            // 1. चेक करें कि यूज़र मौजूद है या नहीं
+            const userExists = await User.findById(userId);
+            if (!userExists) {
+                return res.status(404).json({
+                    success: false,
+                    error: "User account not found."
+                });
+            }
+
+            // 2. यूज़र को डिलीट करें (इससे आपके पुराने कैस्केडिंग हुक्स अपने आप ट्रिगर हो जाएंगे)
+            await User.findByIdAndDelete(userId);
+
+            // 3. अगर आप कुकीज़ (Cookies) में टोकन सेव करते हैं, तो उसे भी साफ़ (Clear) कर दें
+            res.clearCookie('token'); 
+
+            return res.status(200).json({
+                success: true,
+                message: "Your account and all associated data have been permanently deleted."
+            });
+
+        } catch (error) {
+            console.error("Delete User JWT API Error:", error);
+            return res.status(500).json({
+                success: false,
+                error: "Server error during account deletion."
+            });
+        }
     }
 
     async verifyEmail(req, res) {
@@ -187,11 +255,19 @@ class AuthController {
             await user.save();
 
             const emailHtml = getResetPasswordEmailHtml(name, resetCode);
+
+            const templatePath = path.join(EnvDetails.email_Directory, "ForgetPassword.ejs");
+            // console.log("template path: ", templatePath)
+            const htmlBody = await ejs.renderFile(templatePath, {
+                name: name,
+                resetCode: resetCode
+
+            });
             // Email send karein
             await sendEmail({
                 email: user.email,
                 subject: "Password Reset Code",
-                html: emailHtml
+                html: htmlBody
             });
 
             return res.status(200).json({ message: "If that email exists, a password reset code has been sent." });

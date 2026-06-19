@@ -321,3 +321,16 @@ class CustomerController {
     }
 }
 export default CustomerController;
+
+/* 
+const updatedProduct = await Product.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { 
+                new: true,          // यह आपको अपडेटेड डेटा वापस देगा
+                runValidators: true // यह एडिट के समय वैलिडेशन चेक करेगा 
+            }
+        );
+
+    method 2: .save()-> method ka use karna edit and create time to ye validation check karta hai.
+*/

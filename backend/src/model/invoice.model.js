@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Payment from "./payment.model.js";
 
 const itemSchema = new mongoose.Schema({
   product: {
@@ -95,6 +96,18 @@ const invoiceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+invoiceSchema.pre('deleteOne', async function (next) {
+    try {
+        const invoiceId = this.getQuery()._id;
+
+        await Payment.deleteMany({ invoice: invoiceId });
+        
+        
+    } catch (error) {
+        throw new Error(error.message)
+    }
+});
 
 const Invoice= mongoose.model("Invoice",invoiceSchema);
 

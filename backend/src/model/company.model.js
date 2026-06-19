@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
-import { type } from "node:os";
+import Customer from './customer.model.js';
+import Product from './product.model.js';
+import Payment from './payment.model.js';
+import Invoice from './invoice.model.js';
 
 const companySchema = new mongoose.Schema({
     CompanyName: {
@@ -43,6 +46,23 @@ const companySchema = new mongoose.Schema({
         required: true,
     },
 }, { timestamps: true });
+
+companySchema.pre('findOneAndDelete', async function (next) {
+    try {
+        const companyId = this.getQuery()._id;
+
+        // 1. इस कंपनी से जुड़े सभी कस्टमर्स, प्रोडक्ट्स और पेमेंट्स को एक साथ साफ़ करें
+        await Customer.deleteMany({ company: companyId });
+        await Product.deleteMany({ company: companyId });
+        await Payment.deleteMany({ company: companyId });
+
+        // 2. इनवॉइसेज को डिलीट करें (items इनवॉइस स्कीमा के अंदर ही हैं, इसलिए वो भी साफ हो जाएंगे)
+        await Invoice.deleteMany({ company: companyId });
+
+    } catch (error) {
+        throw new Error(error.message)
+    }
+});
 
 const Company = mongoose.model("Company", companySchema);
 
